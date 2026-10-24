@@ -14,6 +14,7 @@ check(after[0].x>before[0].x+100,'continuous actor path changes position within 
 check(renderer.locate(film,7100).index===1&&renderer.locate(film,7100).local===100,'global playback crosses shot boundary at exact time');
 check(renderer.locate(film,28000).index===3,'final frame belongs to final shot');
 check(calls.some(x=>x[0]==='fillText'&&String(x[1]).includes('lift stopped')),'timed real caption reaches Canvas text drawing');
+film.shots[0].speech[0].text='A'.repeat(180);const start=calls.length;renderer.draw(film,1000);check(calls.slice(start).filter(x=>x[0]==='fillText'&&/^A+$/.test(x[1])).every(x=>x[1].length<=31),'long unbroken caption wraps inside the bubble');
 film.shots[0].speech[0].text='</script><script>globalThis.pwned=true</script>';
 film.title='A <new> & "different" film';
 const exported=filmHtml(film,'Attribution </script> stays text');

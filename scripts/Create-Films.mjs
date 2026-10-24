@@ -1,0 +1,8 @@
+import {readFile,writeFile,readdir} from 'node:fs/promises';
+import {join} from 'node:path';
+import {filmHtml} from '../src/StageFold.App/wwwroot/stage.js';
+const folder=process.argv[2];if(!folder)throw Error('Provide the original-film release directory.');
+const files=(await readdir(join(folder,'Scenes'))).filter(x=>x.endsWith('.json')).sort(),links=[];
+for(const file of files){const film=JSON.parse(await readFile(join(folder,'Scenes',file),'utf8')),name=file.replace('.film.json','.html');await writeFile(join(folder,name),filmHtml(film,'Original StageFold editorial film. Starter text, vector artwork and renderer: CC0 1.0. Captioned, no audio. https://creativecommons.org/publicdomain/zero/1.0/'));links.push(`<li><a href="${name}">${film.title.replace(/[&<>]/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[x]))}</a> — 28 seconds · original first-party example</li>`);}
+await writeFile(join(folder,'index.html'),'<!DOCTYPE html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>StageFold original films</title><style>body{background:#101014;color:#f5f2e9;font:18px/1.6 system-ui;max-width:900px;margin:40px auto;padding:20px}a{color:#ffb35c}li{margin:16px 0}</style><h1>Twelve small films</h1><p>Original StageFold examples, not community submissions. Open a film here without an account, framework or network connection. The Scenes folder contains editable JSON documents.</p><ol>'+links.join('')+'</ol><p>Bundled text, artwork and renderer: CC0 1.0. No voice or audio.</p></html>');
+console.log(`Created ${files.length} standalone original film players.`);
