@@ -30,3 +30,5 @@ See [Operations](docs/Operations.md) for exact owner actions, [Service contract]
 Membership checkout is currently **unconfigured** and unavailable. The free local workflow and real shared allowance work. The signed Stripe adapter requires all three merchant readiness values and never grants paid capacity from a return URL or a test notification. No advertising/analytics is loaded.
 
 Original bundled starter text/vector artwork and the portable renderer are CC0; other source is MIT. Community cuts use the explicit CC BY 4.0 publication grant. Public repository access is not a claim of customer demand or commercial success.
+
+Main-origin mounting: [Subpath mount](docs/Subpath-Mount.md).

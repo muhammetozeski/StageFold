@@ -1,3 +1,4 @@
+import {appBasePath} from './paths.mjs';
 const encoder=new TextEncoder();
 export const day=86400000,cookieName='sf_session';
 export class ServiceError extends Error{constructor(status,message,code='invalid_request'){super(message);this.status=status;this.code=code;}}
@@ -12,7 +13,7 @@ export async function rawBody(request,max){const reader=request.body?.getReader(
 export async function readBody(request,max=112000){if(!(request.headers.get('content-type')||'').toLowerCase().startsWith('application/json'))fail(415,'Send this action as JSON.');let value;try{value=JSON.parse(await rawBody(request,max));}catch(e){if(e instanceof ServiceError)throw e;fail(400,'A valid JSON object is required.');}object(value,Object.keys(value||{}));return value;}
 export function sameOrigin(request){if(request.headers.get('origin')!==new URL(request.url).origin)fail(403,'Submit this action from the site itself.','origin');}
 export function tokenFrom(request){const entry=(request.headers.get('cookie')||'').split(';').map(x=>x.trim()).find(x=>x.startsWith(cookieName+'='));return entry?.slice(cookieName.length+1);}
-export function sessionCookie(token,age=2592000){return `${cookieName}=${token}; Path=/api; Max-Age=${age}; HttpOnly; Secure; SameSite=Strict`;}
+export function sessionCookie(token,age=2592000,basePath='/'){return `${cookieName}=${token}; Path=${appBasePath(basePath)}api; Max-Age=${age}; HttpOnly; Secure; SameSite=Strict`;}
 export async function accountFrom(request,db){const token=tokenFrom(request);if(!/^[A-Za-z0-9_-]{43}$/.test(token||''))return null;return db.prepare('SELECT a.id,a.alias,a.created_at AS createdAt FROM sf_sessions s JOIN sf_accounts a ON a.id=s.account_id WHERE s.token_hash=? AND s.expires_at>?').bind(await hash(token),Date.now()).first();}
 export function requireAccount(account){if(!account)fail(401,'Create an account or recover your account to continue.','authentication');return account;}
 export async function limit(db,identity,action,max,seconds=60){const now=Date.now(),bucket=Math.floor(now/(seconds*1000));const result=await db.prepare('INSERT INTO sf_rate_limits(rate_key,count,expires_at) VALUES(?,1,?) ON CONFLICT(rate_key) DO UPDATE SET count=count+1 WHERE count<? RETURNING count').bind(action+':'+identity+':'+bucket,(bucket+1)*seconds*1000,max).all();if(!result.results?.length)fail(429,'The action limit was reached. Keep your local film and try again later.','rate_limit');}
