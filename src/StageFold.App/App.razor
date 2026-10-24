@@ -1,0 +1,4 @@
+<Router AppAssembly="@typeof(App).Assembly">
+    <Found Context="route"><RouteView RouteData="@route" DefaultLayout="@typeof(StageLayout)" /><FocusOnNavigate RouteData="@route" Selector="h1" /></Found>
+    <NotFound><LayoutView Layout="@typeof(StageLayout)"><h1>That stage is empty.</h1><p>The address does not match a page. <a href="/studio">Open the studio</a>.</p></LayoutView></NotFound>
+</Router>
