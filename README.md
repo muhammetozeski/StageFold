@@ -1,6 +1,6 @@
 # StageFold
 
-[Live studio](https://muhammetozeski-stagefold.pages.dev) · [Public source](https://github.com/muhammetozeski/StageFold) · .NET 10 / Blazor / Canvas / D1
+[Live studio](https://muhammetozeski-stagefold.pages.dev) · [Public source](https://github.com/muhammetozeski/StageFold) · [Download 1.0.0](https://github.com/muhammetozeski/StageFold/releases/tag/v1.0.0) · .NET 10 / Blazor / Canvas / D1
 
 A small stage for short, captioned motion comics. Arrange a cast, direct entrances and gestures, time dialogue, play a continuous scene, and export a standalone film player. Shared projects and immutable public cuts connect collaborators without silently replacing another person's work.
 

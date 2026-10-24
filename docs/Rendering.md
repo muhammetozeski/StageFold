@@ -10,8 +10,10 @@ WebM is capability-gated by canvas capture and a supported MediaRecorder codec, 
 
 ## Verified boundary
 
-Twenty-three C# assertions exercise the complete original films, canonical round-trip, invalid timing/references/movement and actual scene comparisons. Ten Node consumer assertions check motion, caption drawing and the actual embedded offline script; that consumer alone is not native rendering evidence.
+Twenty-three C# assertions exercise the complete original films, canonical round-trip, invalid timing/references/movement and actual scene comparisons. Eleven Node consumer assertions check motion, caption drawing, long-word wrapping and the actual embedded offline script; that consumer alone is not native rendering evidence.
 
 An isolated installed Edge headless profile then used production `stage.js`: native Canvas pixels changed within one shot, MediaRecorder produced a 252,768-byte VP9 WebM with the EBML container, the actual file decoded as 960×540 video, and the exported HTML loaded from `file://`, advanced its native playback time and changed pixels. The consumer and temporary browser profile stayed outside user browser data. `verification/browser.spec.mjs` reproduces this against an explicit NewTemp output folder; it downloads no browser. This proves the tested browser path, not every browser/codec combination.
 
 The runtime contrast guard applies to actual DOM text, including dynamic Blazor content. Theme defaults to dark, with only the preference stored locally. Product markers are `data-sf-theme`, `data-sf-appearance="style"`, `data-sf-appearance="script"`; the public audit namespace is `StageFoldAppearance`. It does not import another product's layout.
+
+Independent native public reads of the studio, loaded cutting room and membership page examined227 visible text/control samples with no settled contrast failures or unparsed colors. An initial Busy frame exposed three low-contrast disabled controls; the observer's attribute filter was extended to `disabled`, so later state changes trigger repair without needing child-text changes. That final narrow addition was source/parser checked and published; the earlier settled-state measurement is not relabelled as a new Busy-state browser measurement.
