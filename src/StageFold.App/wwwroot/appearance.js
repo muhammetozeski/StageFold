@@ -7,7 +7,7 @@
   const surfaces = new Set(['HTML','BODY','HEADER','MAIN','SECTION','ARTICLE','ASIDE','NAV','DIV','FORM','FIELDSET','LEGEND','TABLE','THEAD','TBODY','TFOOT','TR','TH','TD','DETAILS','SUMMARY','FOOTER','INPUT','TEXTAREA','SELECT','OPTION','BUTTON','DIALOG','UL','OL','LI','PRE','CODE','LABEL']);
   let scheduled = false, processing = false, control = null, converter = null, theme = 'dark', repaired = 0, backgroundCache = new WeakMap();
   try { if (localStorage.getItem(storageKey) === 'light') theme = 'light'; } catch { /* Restricted storage keeps the declared dark default. */ }
-  document.documentElement.dataset.raTheme = theme;
+  document.documentElement.dataset.sfTheme = theme;
 
   function color(value) {
     if (parsed.has(value)) return parsed.get(value);
@@ -125,7 +125,7 @@
   }
   function setTheme(value) {
     if(!['dark','light'].includes(value))throw new TypeError('Choose dark or light theme.');
-    theme=value;document.documentElement.dataset.raTheme=theme;
+    theme=value;document.documentElement.dataset.sfTheme=theme;
     try{localStorage.setItem(storageKey,theme);}catch{/* The current theme still works when browser storage is restricted. */}
     queue(document);
   }

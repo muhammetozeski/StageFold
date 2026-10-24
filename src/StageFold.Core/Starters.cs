@@ -70,7 +70,7 @@ public static class Starters
     static Film Make(string title, string stage, string a, string lookA, string colorA, string b, string lookB, string colorB,
         (string label, string lineA, string lineB, string poseA, string poseB)[] beats)
     {
-        Film f = new() { Title = title, Summary = "Original StageFold starter. A complete short scene to direct, rewrite or remix.", Cast = [new() { Id = "a", Name = a, Look = lookA, Color = colorA }, new() { Id = "b", Name = b, Look = lookB, Color = colorB }] };
+        Film f = new() { Title = title, Summary = "A short story to direct, rewrite or remix.", Cast = [new() { Id = "a", Name = a, Look = lookA, Color = colorA }, new() { Id = "b", Name = b, Look = lookB, Color = colorB }] };
         for (var i = 0; i < beats.Length; i++)
         {
             var x = beats[i];

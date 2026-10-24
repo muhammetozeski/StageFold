@@ -12,7 +12,7 @@ public sealed class StageApi(HttpClient http)
     async Task<T> Send<T>(HttpRequestMessage request)
     {
         using(request){using var response=await http.SendAsync(request);if(IsLogEnabled)Console.WriteLine($"StageFold API {request.Method}; status={(int)response.StatusCode}; body and credentials omitted");
-            if(!response.IsSuccessStatusCode){var error=await response.Content.ReadFromJsonAsync<ApiError>();throw new StageApiException((int)response.StatusCode,error?.Error??"The service action failed.",error?.Code??"service_error");}
+            if(!response.IsSuccessStatusCode){var error=await response.Content.ReadFromJsonAsync<ApiError>();var message=error?.Code switch{"billing_configuration"=>"Subscriptions are unavailable.","billing_provider"=>"The payment service did not respond. Check your subscription before trying again.","service_failure"=>"The action could not finish. Check the saved film, then try again.",_=>error?.Error??"The action could not finish. Try again."};throw new StageApiException((int)response.StatusCode,message,error?.Code??"service_error");}
             return await response.Content.ReadFromJsonAsync<T>(StageFold.Core.FilmRules.Json)??throw new FormatException("The service returned an empty result.");}
     }
     sealed class ApiError {public string Error{get;set;}="";public string Code{get;set;}="";}
