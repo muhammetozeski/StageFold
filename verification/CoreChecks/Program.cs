@@ -8,7 +8,7 @@ var all=Starters.All();Check(all.Length==12,"twelve complete original first-part
 foreach(var f in all){var json=FilmRules.Serialize(f);var restored=FilmRules.Parse(json);Check(FilmRules.Compare(f,restored).Length==0&&FilmRules.Duration(restored)==28000,$"canonical round-trip: {f.Title}");}
 var film=FilmRules.Clone(all[0]);
 var good=FilmRules.Serialize(film);
-Reject(()=>FilmRules.Parse(good.Replace("\"formatVersion\": 1","\"formatVersion\": 1,\"privateCredential\":\"no\"")),"unknown fields rejected");
+Reject(()=>FilmRules.Parse(good.Replace("\"formatVersion\":1","\"formatVersion\":1,\"privateCredential\":\"no\"")),"unknown fields rejected");
 film.Shots[0].Performers[0].ToX=double.NaN;Reject(()=>FilmRules.Validate(film),"nonfinite actor movement rejected");
 film=FilmRules.Parse(good);film.Shots[0].Performers[0].ActorId="missing";Reject(()=>FilmRules.Validate(film),"dangling actor rejected");
 film=FilmRules.Parse(good);film.Shots[0].Speech[0].EndMs=9000;Reject(()=>FilmRules.Validate(film),"caption cannot escape shot duration");

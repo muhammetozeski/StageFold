@@ -13,7 +13,7 @@ public static partial class FilmRules
     public static readonly string[] Stages = ["rooftop", "station", "cafe", "moon", "archive", "workshop", "garden", "harbor"];
     public static readonly string[] Poses = ["idle", "walk", "wave", "point", "think", "celebrate", "sit", "reach"];
     public static readonly string[] Moods = ["calm", "happy", "surprised", "sad", "determined"];
-    public static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web) { WriteIndented = true, MaxDepth = 20, UnmappedMemberHandling = System.Text.Json.Serialization.JsonUnmappedMemberHandling.Disallow };
+    public static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web) { WriteIndented = false, MaxDepth = 20, UnmappedMemberHandling = System.Text.Json.Serialization.JsonUnmappedMemberHandling.Disallow };
 
     /// <summary>Creates a portable identifier without relying on array position.</summary>
     public static string NewId() => Guid.NewGuid().ToString("N");

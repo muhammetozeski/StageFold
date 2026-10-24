@@ -72,4 +72,38 @@ const invalidPrivate={...original,secret:'PRIVATE_SENTINEL'};check((await call('
 await call('account/delete',{confirmation:'DELETE MY ACCOUNT'},auth);check((await call('account',null,auth)).body.account===null,'account deletion invalidates session');
 check((await call('projects/'+projectId,null,view)).status===404,'owner deletion cascades private collaboration');
 check((await call('cuts/'+cutId)).status===404,'deleted publisher cut remains withdrawn');
+// Controlled provider responses test the adapter, not a real payment or a real customer.
+check(!(await call('billing',null,edit)).body.configured,'checkout disabled without merchant readiness');
+env.STRIPE_SECRET_KEY='sk_test_isolated_fixture';env.STRIPE_PRICE_ID='price_IsolatedStudio';
+check(!(await call('billing',null,edit)).body.configured,'key and price alone cannot enable checkout');
+check((await call('billing/checkout',{requestId:crypto.randomUUID()},edit)).status===503,'missing webhook secret blocks checkout');
+env.STRIPE_WEBHOOK_SECRET='whsec_isolated_fixture';
+const originalFetch=globalThis.fetch,checkoutKeys=[];const period=Math.floor(Date.now()/1000)+86400;
+let subscription={id:'sub_IsolatedStudio',customer:'cus_IsolatedStudio',status:'active',livemode:false,current_period_end:period,metadata:{app:'stagefold',account_id:editor.body.account.id},items:{data:[{price:{id:env.STRIPE_PRICE_ID,unit_amount:900,currency:'usd',recurring:{interval:'month'}}}]}};
+globalThis.fetch=async(url,options={})=>{
+ assert.ok(String(url).startsWith('https://api.stripe.com/v1/'),'fixed provider origin');
+ if(String(url).includes('/prices/'))return Response.json({...subscription.items.data[0].price,active:true});
+ if(String(url).endsWith('/checkout/sessions')){checkoutKeys.push(options.headers['Idempotency-Key']);return Response.json({id:'cs_IsolatedStudio',url:'https://checkout.stripe.com/c/pay/isolatedfixture'});}
+ if(String(url).includes('/subscriptions/'))return Response.json(subscription);
+ throw Error('Unrecognized controlled provider operation');
+};
+async function notification(event,signature=true){const raw=JSON.stringify(event),timestamp=String(Math.floor(Date.now()/1000));const key=await crypto.subtle.importKey('raw',new TextEncoder().encode(env.STRIPE_WEBHOOK_SECRET),{name:'HMAC',hash:'SHA-256'},false,['sign']);const digest=[...new Uint8Array(await crypto.subtle.sign('HMAC',key,new TextEncoder().encode(timestamp+'.'+raw)))].map(x=>x.toString(16).padStart(2,'0')).join('');return call('billing/webhook',event,{headers:signature?{'stripe-signature':`t=${timestamp},v1=${digest}`}:{}});}
+try{
+ const [one,two]=await Promise.all([call('billing/checkout',{requestId:crypto.randomUUID()},edit),call('billing/checkout',{requestId:crypto.randomUUID()},edit)]);
+ check(one.status===200&&two.status===200&&one.body.url===two.body.url&&new Set(checkoutKeys).size===1,'concurrent checkout reuses one pending provider identity');
+ check(db.native.prepare('SELECT COUNT(*) AS n FROM sf_checkout_intents').get().n===1,'one actual pending checkout row per account');
+ const event={id:'evt_IsolatedTest',created:Math.floor(Date.now()/1000),type:'customer.subscription.updated',livemode:false,data:{object:{id:subscription.id}}};
+ check((await notification(event,false)).status===400,'unsigned billing event refused');
+ check((await notification(event)).status===200,'correctly signed controlled test event handled');
+ check(!(await call('account',null,edit)).body.account.premium,'test mode never grants live capacity');
+ check((await notification(event)).body.replayed,'same signed provider event deduplicated');
+ subscription={...subscription,livemode:true};const live={...event,id:'evt_IsolatedLive',created:event.created+1,livemode:true};
+ check((await notification(live)).body.liveEntitlement,'signed live-shaped matching-plan fixture grants verified live entitlement');
+ check((await call('projects',null,edit)).body.account.projectLimit===30,'live entitlement controls real project capacity');
+ check((await call('billing/checkout',{requestId:crypto.randomUUID()},edit)).status===409,'active subscriber cannot start another checkout');
+ subscription={...subscription,status:'canceled'};await notification({...live,id:'evt_IsolatedCancel',created:event.created+2,type:'customer.subscription.deleted'});
+ check(!(await call('account',null,edit)).body.account.premium,'cancellation removes paid allowance');
+ subscription={...subscription,status:'active'};await notification({...live,id:'evt_IsolatedOld',created:event.created});
+ check(!(await call('account',null,edit)).body.account.premium,'stale activation cannot restore canceled allowance');
+}finally{globalThis.fetch=originalFetch;}
 console.log(`${checks} real SQLite/request assertions passed`);

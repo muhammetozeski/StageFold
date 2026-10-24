@@ -8,6 +8,6 @@ if(!current?.id||current.environment!=='production'||current.deployment_trigger?
 const url=new URL(current.url);if(url.protocol!=='https:'||!url.hostname.endsWith('.muhammetozeski-stagefold.pages.dev'))throw Error('The current deployment origin is not accepted.');
 const [health,build]=await Promise.all([fetch(url.origin+'/api/health').then(r=>r.json()),fetch(url.origin+'/build-info.json').then(r=>r.json())]);
 if(!health.ok||health.service!=='StageFold'||build.sourceCommit!==commit)throw Error('The new service/build did not verify. Old deployments were retained.');
-const deployments=await api('/deployments?per_page=100');let retired=0;
+const deployments=[];for(let page=1;page<=100;page++){const rows=await api('/deployments?per_page=25&page='+page);deployments.push(...rows);if(rows.length<25)break;}let retired=0;
 for(const item of deployments){if(item.id===current.id)continue;if(['active','queued'].includes(item.latest_stage?.status))continue;await api('/deployments/'+encodeURIComponent(item.id)+'?force=true','DELETE');retired++;}
 console.log(`Verified current deployment ${current.id}; retired ${retired} superseded API snapshots. Git and database retained.`);
