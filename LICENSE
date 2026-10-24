@@ -22,6 +22,8 @@ SOFTWARE.
 
 Original bundled starter-film text and vector artwork: CC0 1.0 Universal
 https://creativecommons.org/publicdomain/zero/1.0/
+The self-contained createRenderer function in stage.js is also released under
+CC0 for embedding in portable film exports.
 
 User-published cuts are not covered by this source license. Their public
 publication action explicitly grants CC BY 4.0 as recorded with each cut.

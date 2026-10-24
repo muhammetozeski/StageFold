@@ -32,6 +32,8 @@ jobs:
         run: node verification/service.spec.mjs "$env:RUNNER_TEMP/StageFoldVerification/starter.json"
       - name: Publish independent Blazor studio
         run: ./scripts/Publish-App.ps1
+      - name: Verify selected production cannot receive a stale private result
+        run: dotnet run --project verification/UiChecks/UiChecks.csproj -c Release
       - name: Parse service and renderer sources
         run: node scripts/check.mjs
       - uses: cloudflare/wrangler-action@v4

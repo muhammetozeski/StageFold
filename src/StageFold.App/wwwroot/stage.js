@@ -51,7 +51,7 @@ export function createRenderer(canvas) {
         else {line(-7,-122,7,-122,3);if(p.mood==='determined'){line(-20,-151,-6,-146,3);line(6,-146,20,-151,3);}}
         ctx.restore();return {x,y,head:y-176*p.scale,actorId:c.id};
     }
-    function wrap(text,max) {ctx.font='600 21px system-ui,sans-serif';const words=text.split(/\s+/), lines=[];let line='';for(const word of words){const next=line?line+' '+word:word;if(ctx.measureText(next).width>max&&line){lines.push(line);line=word;}else line=next;}if(line)lines.push(line);return lines;}
+    function wrap(text,max) {ctx.font='600 21px system-ui,sans-serif';const words=text.split(/\s+/), lines=[];let line='';for(const word of words){if(ctx.measureText(word).width>max){if(line){lines.push(line);line='';}for(const character of word){if(ctx.measureText(line+character).width>max){lines.push(line);line='';}line+=character;}}else{const next=line?line+' '+word:word;if(ctx.measureText(next).width>max&&line){lines.push(line);line=word;}else line=next;}}if(line)lines.push(line);return lines;}
     function bubble(text, name, anchor, side) {
         const lines=wrap(text,315), width=360, height=38+lines.length*27, x=clamp(anchor.x-width/2,18,W-width-18), y=side?25:clamp(anchor.head-height-15,25,250);
         ctx.fillStyle='#f5f2e9';ctx.strokeStyle=ink;ctx.lineWidth=4;ctx.beginPath();ctx.roundRect(x,y,width,height,12);ctx.fill();ctx.stroke();
