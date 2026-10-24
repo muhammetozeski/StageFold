@@ -1,0 +1,47 @@
+name: Verify and publish StageFold
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  deployments: write
+concurrency:
+  group: stagefold-production
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+      - name: Verify the finite film graph
+        run: dotnet run --project verification/CoreChecks/CoreChecks.csproj -c Release -- "$env:RUNNER_TEMP/StageFoldVerification"
+      - name: Verify renderer and offline player
+        run: node verification/renderer.spec.mjs "$env:RUNNER_TEMP/StageFoldVerification/starter.json"
+      - name: Verify actual SQL, collaboration and billing boundary
+        run: node verification/service.spec.mjs "$env:RUNNER_TEMP/StageFoldVerification/starter.json"
+      - name: Publish independent Blazor studio
+        run: ./scripts/Publish-App.ps1
+      - name: Parse service and renderer sources
+        run: node scripts/check.mjs
+      - uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy public --project-name=muhammetozeski-stagefold --branch=main
+          gitHubToken: ${{ github.token }}
+      - name: Retire superseded APIs after verifying the new deployment
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: node scripts/Retire-Superseded.mjs

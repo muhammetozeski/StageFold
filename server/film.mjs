@@ -1,0 +1,25 @@
+import {fail,object,text,canonical} from './security.mjs';
+export const vocabulary={looks:['dot','box','kite','reed','cat','orb'],colors:['orange','blue','pink','green','yellow','white'],stages:['rooftop','station','cafe','moon','archive','workshop','garden','harbor'],poses:['idle','walk','wave','point','think','celebrate','sit','reach'],moods:['calm','happy','surprised','sad','determined']};
+const choice=(x,values,label)=>{if(!values.includes(x))fail(400,`Unknown ${label}.`);};
+const range=(x,a,b,label)=>{if(typeof x!=='number'||!Number.isFinite(x)||x<a||x>b)fail(400,`${label} is outside the stage boundary.`);};
+const integer=(x,a,b,label)=>{if(!Number.isInteger(x)||x<a||x>b)fail(400,`${label} must be an integer between ${a} and ${b}.`);};
+const ids=(list,label)=>{const values=list.map(x=>x.id);if(values.some(x=>!(/^[A-Za-z0-9_-]{1,64}$/.test(x||'')))||new Set(values).size!==values.length)fail(400,`${label} identifiers must be unique letters, numbers, dashes or underscores.`);};
+
+/** Checks the same finite vocabulary/timing as C#; canonical storage drops no unexpected fields. */
+export function validateFilm(f){
+ object(f,['formatVersion','title','summary','cast','shots'],'Film');if(f.formatVersion!==1)fail(400,'Unsupported film format.');text(f.title,'Film title',120);text(f.summary,'Synopsis',600,0);
+ if(!Array.isArray(f.cast)||f.cast.length<1||f.cast.length>6)fail(400,'Use one to six cast members.');if(!Array.isArray(f.shots)||f.shots.length<1||f.shots.length>12)fail(400,'Use one to twelve shots.');ids(f.cast,'Cast');ids(f.shots,'Shot');const cast=new Set(f.cast.map(c=>c.id));
+ for(const c of f.cast){object(c,['id','name','look','color'],'Cast');text(c.name,'Cast name',32);choice(c.look,vocabulary.looks,'look');choice(c.color,vocabulary.colors,'color');}
+ let duration=0;
+ for(const s of f.shots){object(s,['id','label','stage','durationMs','performers','speech'],'Shot');text(s.label,'Shot label',80);choice(s.stage,vocabulary.stages,'stage');integer(s.durationMs,3000,15000,'Shot duration');duration+=s.durationMs;
+  if(!Array.isArray(s.performers)||s.performers.length<1||s.performers.length>4)fail(400,'Each shot needs one to four performers.');if(!Array.isArray(s.speech)||s.speech.length>8)fail(400,'Use at most eight caption beats per shot.');ids(s.speech,'Caption');const present=new Set(s.performers.map(p=>p.actorId));if(present.size!==s.performers.length)fail(400,'A performer appears more than once in a shot.');
+  for(const p of s.performers){object(p,['actorId','fromX','fromY','toX','toY','scale','pose','mood','flip'],'Performance');if(!cast.has(p.actorId))fail(400,'A performer references missing cast.');for(const key of ['fromX','toX'])range(p[key],.06,.94,key);for(const key of ['fromY','toY'])range(p[key],.45,.92,key);range(p.scale,.6,1.5,'Scale');choice(p.pose,vocabulary.poses,'gesture');choice(p.mood,vocabulary.moods,'expression');if(typeof p.flip!=='boolean')fail(400,'Facing must be a boolean.');}
+  for(const line of s.speech){object(line,['id','actorId','startMs','endMs','text'],'Caption');text(line.text,'Caption',180);if(!present.has(line.actorId))fail(400,'A caption actor must be on stage.');integer(line.startMs,0,s.durationMs,'Caption start');integer(line.endMs,0,s.durationMs,'Caption end');if(line.endMs-line.startMs<700)fail(400,'A caption needs at least 0.7 seconds.');}
+  for(const actorId of present){const lines=s.speech.filter(l=>l.actorId===actorId).sort((a,b)=>a.startMs-b.startMs);for(let i=1;i<lines.length;i++)if(lines[i].startMs<lines[i-1].endMs)fail(400,'The same actor cannot speak overlapping captions.');}
+ }
+ if(duration>90000)fail(400,'A film lasts at most 90 seconds.');const document=canonical(f),body=JSON.stringify(document);if(new TextEncoder().encode(body).length>98304)fail(413,'Film JSON exceeds 96 KiB.');return {document,body,duration};
+}
+
+/** Ignores naming/identifier-only edits when deciding whether a remix contains a creative change. */
+export function creativeProjection(f){const castIndex=new Map(f.cast.map((c,i)=>[c.id,i]));return canonical({cast:f.cast.map(({name,look,color})=>({name,look,color})),shots:f.shots.map(s=>({stage:s.stage,durationMs:s.durationMs,performers:s.performers.map(p=>({...p,actorId:castIndex.get(p.actorId)})),speech:s.speech.map(({actorId,startMs,endMs,text})=>({actor:castIndex.get(actorId),startMs,endMs,text}))}))});}
+export function changes(before,after){if(!before)return {original:true,castChanged:false,changedShots:[],addedShots:after.shots.map(s=>s.label),removedShots:[],durationBefore:0,durationAfter:after.shots.reduce((n,s)=>n+s.durationMs,0)};const old=new Map(before.shots.map(s=>[s.id,s]));return {original:false,castChanged:JSON.stringify(before.cast)!==JSON.stringify(after.cast),changedShots:after.shots.filter(s=>old.has(s.id)&&JSON.stringify(canonical(old.get(s.id)))!==JSON.stringify(canonical(s))).map(s=>s.label),addedShots:after.shots.filter(s=>!old.has(s.id)).map(s=>s.label),removedShots:before.shots.filter(s=>!after.shots.some(n=>n.id===s.id)).map(s=>s.label),durationBefore:before.shots.reduce((n,s)=>n+s.durationMs,0),durationAfter:after.shots.reduce((n,s)=>n+s.durationMs,0)};}

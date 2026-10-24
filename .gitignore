@@ -4,6 +4,7 @@ publish/
 .wrangler/
 .dev.vars*
 .env*
+.private/
 *.pfx
 PFX-PAROLA.txt
 Imzalama.pfx
@@ -16,5 +17,7 @@ public/StageFold.styles.css
 public/index.html
 public/app.css
 public/stage.js
+public/files.js
+public/icon.svg
 public/appearance.*
 public/build-info.json
