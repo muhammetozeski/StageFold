@@ -6,7 +6,7 @@ Public repository: https://github.com/muhammetozeski/StageFold
 
 Release: https://github.com/muhammetozeski/StageFold/releases/tag/v1.0.0
 
-The release tag and actual published build target `357211b272e2ed1dcbe1fbdf411c6ecfbea1f33b`. Production deployment is `8093bf46-819a-44c6-9ae8-0c25c2eeef5c`; GitHub Actions40123508055 succeeded. The provider inventory contained exactly the current snapshot after superseded API retirement. Source history and all service data remain. Later documentation-only commits do not imply a different application build.
+The release tag and actual published build target `357211b272e2ed1dcbe1fbdf411c6ecfbea1f33b`. Production deployment is `8093bf46-819a-44c6-9ae8-0c25c2eeef5c`; GitHub Actions 40123508055 succeeded. The provider inventory contained exactly the current snapshot after superseded API retirement. Source history and all service data remain. Later documentation-only commits do not imply a different application build.
 
 ## Artifacts
 
@@ -29,11 +29,11 @@ Archives were inspected:26 and177 entries respectively, with no `.private`, reco
 
 ## Evidence and scope
 
--23 C# film-domain assertions and11 renderer/export consumer assertions.
--61 real SQLite/request assertions, including current-role streamed-body admission and controlled signed-provider fixtures. Controlled provider replies are not live payment evidence.
--7 consumer assertions invoking the actual compiled Razor production page with a delayed invitation, publication or deletion response, verifying it cannot replace the newly selected project's state.
+- 23 C# film-domain assertions and11 renderer/export consumer assertions.
+- 61 real SQLite/request assertions, including current-role streamed-body admission and controlled signed-provider fixtures. Controlled provider replies are not live payment evidence.
+- 7 consumer assertions invoking the actual compiled Razor production page with a delayed invitation, publication or deletion response, verifying it cannot replace the newly selected project's state.
 - Isolated native browser Canvas motion, real VP9 WebM generation/decoding and offline HTML playback. See Rendering.md for precise scope.
-- Independent65 actual HTTPS/API assertions with two disposable accounts: tenant isolation, editor/viewer roles, one-use joins, concurrent saves yielding one200/one409, revoked access, immutable published body/hash, pinned fork and changed-shot descendant. Cleanup used actual withdrawal, private-project deletion and account deletion. Two anonymized withdrawn cut records remain as provenance, not visible users or erased data.
-- Independent native public read:227 samples, zero settled contrast failures/unparsed colors, English and dark default. Final disabled-attribute coverage change is separately described in Rendering.md.
+- Independent 65 actual HTTPS/API assertions with two disposable accounts: tenant isolation, editor/viewer roles, one-use joins, concurrent saves yielding one200/one409, revoked access, immutable published body/hash, pinned fork and changed-shot descendant. Cleanup used actual withdrawal, private-project deletion and account deletion. Two anonymized withdrawn cut records remain as provenance, not visible users or erased data.
+- Independent native public read: 227 samples, zero settled contrast failures/unparsed colors, English and dark default. Final disabled-attribute coverage change is separately described in Rendering.md.
 
 Merchant configuration remains absent: actual billing reported `configured:false`, `mode:'unconfigured'`, `premium:false`. Local production and free shared work operate. The $9 membership proposal, repeat use and demand remain unvalidated commercial hypotheses. No audience, customer or revenue claim is inferred from verification fixtures.
